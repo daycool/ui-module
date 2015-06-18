@@ -1,6 +1,6 @@
 /*
  * @author  qmw920@163.com
- * @home https://github.com/qmw/ui-module
+ * @home https://github.com/daycool/ui-module
  * License: MIT
  */
 
