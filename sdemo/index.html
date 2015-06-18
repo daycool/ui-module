@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>测试  ui-module</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width">
+	<link rel="stylesheet" href="lib/bootstrap.css">
+	<script src="lib/require.js"></script>
+	<script src="lib/angular.js"></script>
+	<script src="../ui-module.js"></script>
+</head>
+<body class="container">
+	<h1 class="text-center">测试  ui-module</h1>
+	<h2>登录组件</h2>
+	<div ui-module="user/Login" class="well"></div>
+	<h2>用户列表组件</h2>
+	<div ui-module="user/UserList" ui-loading class="well"></div>
+
+<script>
+	require.config({
+		paths: {
+			text: './lib/text'
+		}
+	});
+
+	var app = angular.module('app', ['ui-module']);
+	angular.bootstrap(document.body, ['app']);
+	
+</script>
+</body>
+</html>
