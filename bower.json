@@ -1,0 +1,13 @@
+{
+  "name": "ui-module",
+  "authors": [
+    "daycool <qmw920@163.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [],
+  "dependencies": {
+    
+  }
+}
