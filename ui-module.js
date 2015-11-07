@@ -74,12 +74,15 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                     }
 
                     function moduleExec(moduleFn){
+                        var moduleName = '';
+                        var ctrlScope = '';
                         if(!angular.isFunction(moduleFn)){
                             console.error('约定组件返回地址应该函数--组件地址:' + moduleUrl);
                         }
                         elem.html('');
                         moduleFn(app, elem, attrs, scope);
                         $compile(elem.contents())(scope);
+                        ctrlScope = elem.find('[ng-controller]').scope();
                         if(!scope.$$phase) {
                           scope.$apply();
                         }
@@ -87,7 +90,9 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                             var moduleName = getModuleName(moduleUrl);
                             _G = window._G = window._G || {};
                             _G.myScope = _G.myScope || {};
-                            _G.myScope[moduleName] = scope;                          
+                            _G.myScope[moduleName] = ctrlScope;
+                            ctrlScope.$moduleName = moduleName;
+                      
                         }catch(e){
                             console.log('设置_G.myScope.moduleName错误')
                         }
