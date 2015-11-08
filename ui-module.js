@@ -49,8 +49,8 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
 
     }
 
-    $compileProvider.directive('uiModule', ['$compile', '$parse',
-        function($compile, $parse) {
+    $compileProvider.directive('uiModule', ['$compile', '$parse', '$interpolate',
+        function($compile, $parse, $interpolate) {
             return {
                 scope: false,
                 priority: 500,
@@ -84,8 +84,8 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                         $compile(elem.contents())(scope);
                         ctrlScope = elem.find('[ng-controller]').scope();
 
-                        if(ctrlScope.moduleData){
-                            angular.forEach(ctrlScope.moduleData, function(attrKey, ctrlScopeKey){
+                        if(ctrlScope.moduleScope){
+                            angular.forEach(ctrlScope.moduleScope, function(attrKey, ctrlScopeKey){
                                 var bindTypeMap = {
                                     '&': '&',
                                     '@': '@',
@@ -94,7 +94,8 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                                 };
                                 var bindType = bindTypeMap[attrKey.charAt(0)];
                                 bindType = bindType || bindTypeMap['='];
-
+                               
+                                $interpolate
                                 if(bindType === '&'){
 
                                 }
