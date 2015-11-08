@@ -85,39 +85,115 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                         ctrlScope = elem.find('[ng-controller]').scope();
 
                         if(ctrlScope.moduleScope){
-                            angular.forEach(ctrlScope.moduleScope, function(attrKey, ctrlScopeKey){
-                                var bindTypeMap = {
-                                    '&': '&',
-                                    '@': '@',
-                                    '=': '=',
-                                    '^': '^', //逆向绑定，即父变子不变、子变交也变
-                                };
-                                var bindType = bindTypeMap[attrKey.charAt(0)];
-                                bindType = bindType || bindTypeMap['='];
-                               
-                                $interpolate
-                                if(bindType === '&'){
+                            var LOCAL_REGEXP = /^\s*([@=&^])(\??)\s*(\w*)\s*$/;
 
-                                }
+                            isolateScope = ctrlScope;
 
-                                if(bindType === '@' || bindType === '='){
-                                    scope.$watch(attrs[attrKey], function(val){
-                                        var key = '___key___';
-                                        var locals = {};
-                                        locals[key] = val;
-                                        ctrlScope.$eval(ctrlScopeKey + '=' + key, locals);
-                                    });                                    
-                                }
+                            angular.forEach(ctrlScope.moduleScope, function(definition, scopeName) {
+                                var match = definition.match(LOCAL_REGEXP) || [],
+                                    attrName = match[3] || scopeName,
+                                    optional = (match[2] == '?'),
+                                    mode = match[1], // @, =, or &
+                                    lastValue,
+                                    parentGet, parentSet, compare;
 
-                                if(bindType === '=' || bindType === '^'){
-                                    ctrlScope.$watch(ctrlScopeKey, function(val){
-                                        var key = '___key___';
-                                        var locals = {};
-                                        locals[key] = val;                                    
-                                        scope.$eval(attrs[attrKey] + '=' + key, locals);
-                                    });                                
+                                isolateScope.$$isolateBindings[scopeName] = mode + attrName;
+
+                                switch (mode) {
+
+                                    case '@':
+                                        attrs.$observe(attrName, function(value) {
+                                            isolateScope[scopeName] = value;
+                                        });
+                                        attrs.$$observers[attrName].$$scope = scope;
+                                        if (attrs[attrName]) {
+                                            // If the attribute has been provided then we trigger an interpolation to ensure
+                                            // the value is there for use in the link fn
+                                            isolateScope[scopeName] = $interpolate(attrs[attrName])(scope);
+                                        }
+                                        break;
+
+                                    case '=':
+                                        if (optional && !attrs[attrName]) {
+                                            return;
+                                        }
+                                        parentGet = $parse(attrs[attrName]);
+                                        if (parentGet.literal) {
+                                            compare = equals;
+                                        } else {
+                                            compare = function(a, b) {
+                                                return a === b || (a !== a && b !== b);
+                                            };
+                                        }
+                                        parentSet = parentGet.assign || function() {
+                                            // reset the change, or we will throw this exception on every $digest
+                                            lastValue = isolateScope[scopeName] = parentGet(scope);
+                                            throw $compileMinErr('nonassign',
+                                                "Expression '{0}' used with directive '{1}' is non-assignable!",
+                                                attrs[attrName], ctrlScope.name);
+                                        };
+                                        lastValue = isolateScope[scopeName] = parentGet(scope);
+                                        isolateScope.$watch(function parentValueWatch() {
+                                            var parentValue = parentGet(scope);
+                                            if (!compare(parentValue, isolateScope[scopeName])) {
+                                                // we are out of sync and need to copy
+                                                if (!compare(parentValue, lastValue)) {
+                                                    // parent changed and it has precedence
+                                                    isolateScope[scopeName] = parentValue;
+                                                } else {
+                                                    // if the parent can be assigned then do so
+                                                    parentSet(scope, parentValue = isolateScope[scopeName]);
+                                                }
+                                            }
+                                            return lastValue = parentValue;
+                                        }, null, parentGet.literal);
+                                        break;
+
+                                    case '^':
+                                        if (optional && !attrs[attrName]) {
+                                            return;
+                                        }
+                                        parentGet = $parse(attrs[attrName]);
+                                        if (parentGet.literal) {
+                                            compare = equals;
+                                        } else {
+                                            compare = function(a, b) {
+                                                return a === b || (a !== a && b !== b);
+                                            };
+                                        }
+                                        parentSet = parentGet.assign || function() {
+                                            // reset the change, or we will throw this exception on every $digest
+                                            lastValue = isolateScope[scopeName] = parentGet(scope);
+                                            throw $compileMinErr('nonassign',
+                                                "Expression '{0}' used with directive '{1}' is non-assignable!",
+                                                attrs[attrName], ctrlScope.name);
+                                        };
+                                        
+                                        isolateScope.$watch(scopeName, function(val){
+                                            parentSet(scope, val);
+                                        });
+
+                                        break;
+
+                                    case '&':
+                                        parentGet = $parse(attrs[attrName]);
+                                        isolateScope[scopeName] = function(locals) {
+                                            return parentGet(scope, locals);
+                                        };
+                                        break;
+
+                                    default:
+                                        // console.log('dddddddddd');
+                                        throw $compileMinErr('iscp',
+                                            "Invalid isolate scope definition for directive '{0}'." +
+                                            " Definition: {... {1}: '{2}' ...}",
+                                            ctrlScope.name, scopeName, definition);
                                 }
                             });
+
+                            function $compileMinErr(){
+                                console.log('ui-module独立scope定义有问题：', arguments)
+                            }
                         }
 
                         if(!scope.$$phase) {

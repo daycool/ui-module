@@ -13,11 +13,12 @@
 </head>
 <body class="container">
 	<div ng-controller="Test">
-		用户名：{{data.userName}} <input ng-model="data.userName" type="text"><br>
-		密码：{{data.userPass}} <input ng-model="data.userPass" type="text"><br>
+		用户名：{{data.userName}} <input ng-model="data.userName" type="text">@测试<br>
+		密码：{{data.userPass}} <input ng-model="data.userPass" type="text">=测试<br>
+		年龄：{{data.userAge}} <input ng-model="data.userAge" type="text">^测试<br>
 		<h1 class="text-center">测试  ui-module</h1>
 		<h2>登录组件</h2>
-		<div ui-module="user/Login" user-name="data.userName" user-pass="data.userPass" class="well"></div>
+		<div ui-module="user/Login" user-name="{{data.userName}}" user-pass="data.userPass" user-age="data.userAge" class="well"></div>
 		<h2>用户列表组件</h2>
 		<div ui-module="user/UserList" ui-loading class="well"></div>
 	</div>
@@ -33,7 +34,8 @@
 	app.controller('Test', function($scope){
 		$scope.data = {
 			userName: 'daycool',
-			userPass: '',
+			userPass: '123456',
+			userAge: '25',
 		}
 	});
 	angular.bootstrap(document.body, ['app']);
