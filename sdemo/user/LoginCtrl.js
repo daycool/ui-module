@@ -1,7 +1,10 @@
 define('user/LoginCtrl', [], function() {
     return function(app, elem, attrs, scope) {
         app.controller('LoginCtrl', ['$http', '$rootScope', '$scope', 'LoginService', function($http, $rootScope, $scope, LoginService) {
-
+            $scope.moduleData = {
+                'data.userName': 'userName',
+                'data.userPass': 'userPass',
+            };
 
             var data = $scope.data = {
                 userName: 'qian',

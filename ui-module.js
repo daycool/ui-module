@@ -49,10 +49,10 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
 
     }
 
-    $compileProvider.directive('uiModule', ['$compile', '$controller',
-        function($compile, $controller) {
+    $compileProvider.directive('uiModule', ['$compile', '$parse',
+        function($compile, $parse) {
             return {
-                scope: true,
+                scope: false,
                 priority: 500,
                 link: function(scope, elem, attrs) {
                     var moduleUrl = attrs.uiModule;
@@ -83,6 +83,42 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                         moduleFn(app, elem, attrs, scope);
                         $compile(elem.contents())(scope);
                         ctrlScope = elem.find('[ng-controller]').scope();
+
+                        if(ctrlScope.moduleData){
+                            angular.forEach(ctrlScope.moduleData, function(attrKey, ctrlScopeKey){
+                                var bindTypeMap = {
+                                    '&': '&',
+                                    '@': '@',
+                                    '=': '=',
+                                    '^': '^', //逆向绑定，即父变子不变、子变交也变
+                                };
+                                var bindType = bindTypeMap[attrKey.charAt(0)];
+                                bindType = bindType || bindTypeMap['='];
+
+                                if(bindType === '&'){
+
+                                }
+
+                                if(bindType === '@' || bindType === '='){
+                                    scope.$watch(attrs[attrKey], function(val){
+                                        var key = '___key___';
+                                        var locals = {};
+                                        locals[key] = val;
+                                        ctrlScope.$eval(ctrlScopeKey + '=' + key, locals);
+                                    });                                    
+                                }
+
+                                if(bindType === '=' || bindType === '^'){
+                                    ctrlScope.$watch(ctrlScopeKey, function(val){
+                                        var key = '___key___';
+                                        var locals = {};
+                                        locals[key] = val;                                    
+                                        scope.$eval(attrs[attrKey] + '=' + key, locals);
+                                    });                                
+                                }
+                            });
+                        }
+
                         if(!scope.$$phase) {
                           scope.$apply();
                         }

@@ -6,16 +6,21 @@
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width">
 	<link rel="stylesheet" href="lib/bootstrap.css">
+	<script src="lib/jquery-1.11.3.min.js"></script>
 	<script src="lib/require.js"></script>
 	<script src="lib/angular.js"></script>
 	<script src="../ui-module.js"></script>
 </head>
 <body class="container">
-	<h1 class="text-center">测试  ui-module</h1>
-	<h2>登录组件</h2>
-	<div ui-module="user/Login" class="well"></div>
-	<h2>用户列表组件</h2>
-	<div ui-module="user/UserList" ui-loading class="well"></div>
+	<div ng-controller="Test">
+		用户名：{{data.userName}} <input ng-model="data.userName" type="text"><br>
+		密码：{{data.userPass}} <input ng-model="data.userPass" type="text"><br>
+		<h1 class="text-center">测试  ui-module</h1>
+		<h2>登录组件</h2>
+		<div ui-module="user/Login" user-name="data.userName" user-pass="data.userPass" class="well"></div>
+		<h2>用户列表组件</h2>
+		<div ui-module="user/UserList" ui-loading class="well"></div>
+	</div>
 
 <script>
 	require.config({
@@ -25,6 +30,12 @@
 	});
 
 	var app = angular.module('app', ['ui-module']);
+	app.controller('Test', function($scope){
+		$scope.data = {
+			userName: 'daycool',
+			userPass: '',
+		}
+	});
 	angular.bootstrap(document.body, ['app']);
 	
 </script>
