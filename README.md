@@ -1,7 +1,9 @@
 ui-module
 ==================
+Based on the requirejs angular lazyload module (controller、template、directive 、filter etc.)
+
 基于requirejs
-angular模块式开发，按需加载模块, 根据模块延迟加载
+angular 模块式开发，按需加载模块, 根据模块延迟加载
 
 使用ui-module自动加载模块(模块有controller、template、directive等)
 
@@ -32,9 +34,32 @@ ui-loading		显示loading动画(模块加载完成前)
 	angular.bootstrap(document.body, ['app']);
 ```
 
+**4.扩展模块内外数据交互**
+	
+同定义指令时独立scope类似如：
+模板
+```html
+	<div ui-module="user/UserLogin"
+	 user-name="data.userName"
+	 user-pass="data.userPass"
+	 user-Age="data.userAge"
+	 show-Addr="showAddr(userAddr)"  ui-loading></div>
+```	
+
+在模块内controller(UserLoginCtrl)添加
+```js
+		$scope.moduleScope = {
+			'userName': '@userName',
+            'userPass': '=userPass',
+            'showAddr': '&showAddr',
+            'userAge': '^userAge',		//^扩展(和@相反)，即父变子不变，子变父变
+		}
+```
+
 Demo
 -----
-sdemo/index.html
+1. 访问sdemo/index.html
+2. 访问sdemo/ui-router.html
 
 
 更多demo 请访问<a href="http://www.sdemo.cn">SDemo</a> (<a href="http://www.sdemo.cn">www.sdemo.cn</a>)
