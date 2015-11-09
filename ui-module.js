@@ -183,8 +183,7 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                                         break;
 
                                     default:
-                                        // console.log('dddddddddd');
-                                        throw $compileMinErr('iscp',
+                                        $compileMinErr('iscp',
                                             "Invalid isolate scope definition for directive '{0}'." +
                                             " Definition: {... {1}: '{2}' ...}",
                                             ctrlScope.name, scopeName, definition);
@@ -192,7 +191,7 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                             });
 
                             function $compileMinErr(){
-                                console.log('ui-module独立scope定义有问题：', arguments)
+                                console.error('ui-module独立scope定义有问题：', arguments)
                             }
                         }
 
