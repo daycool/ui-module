@@ -58,8 +58,8 @@ ui-loading		显示loading动画(模块加载完成前)
 
 Demo
 -----
-1. 访问sdemo/index.html
-2. 访问sdemo/ui-router.html
+1. 基本使用和模块内外数据通信sdemo/index.html
+2. 配合ui-router使用sdemo/ui-router.html
 
 
 更多demo 请访问<a href="http://www.sdemo.cn">SDemo</a> (<a href="http://www.sdemo.cn">www.sdemo.cn</a>)
