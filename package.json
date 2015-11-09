@@ -1,0 +1,24 @@
+{
+  "name": "ui-module",
+  "version": "0.9",
+  "description": "angular 按需按模块加载, 延迟加载(lazyload)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daycool/ui-module"
+  },
+  "homepage": "https://github.com/daycool/ui-module",
+  "author": {
+    "name": "daycool",
+    "email": "qmw920@163.com.com",
+  },
+  "license": "MIT",
+  "keywords": [
+    "angular",
+    "angularjs",
+    "requirejs",
+    "lazyload"
+  ],
+  "devDependencies": {
+    
+  }
+}
