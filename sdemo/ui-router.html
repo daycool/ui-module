@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>测试  ui-module</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width">
+	<link rel="stylesheet" href="lib/bootstrap.css">
+	<script src="lib/jquery-1.11.3.min.js"></script>
+	<script src="lib/require.js"></script>
+	<script src="lib/angular.js"></script>
+	<script src="lib/angular-ui-router.min.js"></script>
+	<script src="../ui-module.js"></script>
+</head>
+<body class="container">
+	<a ui-sref="userInfo" class="btn btn-link">用户信息</a>
+	<a ui-sref="userList" class="btn btn-link">用户列表</a>
+	<div ui-view></div>
+
+<script>
+	require.config({
+		paths: {
+			text: './lib/text'
+		}
+	});
+
+	var app = angular.module('app', ['ui-module', 'ui.router']);
+	app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider){
+
+		$urlRouterProvider.when('/', function($state){
+			$state.go('userList');
+			return '';
+		});		
+
+		$stateProvider.state('userInfo', {
+			url: '/user/userInfo',
+			template: '<div ui-module="user/UserInfo"></div>',
+		});			
+		$stateProvider.state('userList', {
+			url: '/user/UserList',
+			template: '<div ui-module="user/UserList"></div>',
+		});			
+	}]);
+
+	angular.bootstrap(document.body, ['app']);
+	
+</script>
+</body>
+</html>

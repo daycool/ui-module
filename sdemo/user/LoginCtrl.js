@@ -4,6 +4,7 @@ define('user/LoginCtrl', [], function() {
             $scope.moduleScope = {
                 'userName': '@userName',
                 'userPass': '=userPass',
+                'showAddr': '&showAddr',
                 'userAge': '^userAge',
             };
 
@@ -11,6 +12,10 @@ define('user/LoginCtrl', [], function() {
                 userName: 'qian',
                 userPass: '',
             };
+
+            $scope.showParent = function(){
+                $scope.showAddr({userAddr: $scope.userAddr});
+            }
 
             $scope.submit = function(e){
                 var reqData = data || {};
@@ -27,7 +32,6 @@ define('user/LoginCtrl', [], function() {
                     console.log('请求失败');
                 });
             }
-
             
         }]);
 

@@ -15,7 +15,10 @@
           <td>{{user.id}}</td>
           <td>{{user.userName}}</td>
           <td>{{user.userAge}}</td>
-          <td><a ng-click="delete($index);" class="btn btn-danger">删除</a></td>
+          <td>
+            <a ng-click="delete($index);" class="btn btn-danger">删除</a>
+            <a ui-sref="userInfo" class="btn btn-info">查看</a>
+          </td>
         </tr>
         
       </tbody>
