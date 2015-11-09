@@ -1,8 +1,10 @@
 {
   "name": "ui-module",
+  "version": "0.9",
   "authors": [
     "daycool <qmw920@163.com>"
   ],
+  "main": "ui-module.js",
   "description": "",
   "main": "",
   "license": "MIT",
