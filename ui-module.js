@@ -89,7 +89,7 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
 
                             isolateScope = ctrlScope;
 
-                            (function(isolateScope){
+                            (function(isolateScope, scope){
                                 angular.forEach(ctrlScope.moduleScope, function(definition, scopeName) {
                                     var match = definition.match(LOCAL_REGEXP) || [],
                                         attrName = match[3] || scopeName,
@@ -190,7 +190,7 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                                                 ctrlScope.name, scopeName, definition);
                                     }
                                 });
-                            })(isolateScope);
+                            })(isolateScope, scope);
 
                             function $compileMinErr(){
                                 console.error('ui-module独立scope定义有问题：', arguments)
