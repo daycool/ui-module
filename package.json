@@ -1,6 +1,6 @@
 {
   "name": "ui-module",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "angular 按需按模块加载, 延迟加载(lazyload)",
   "repository": {
     "type": "git",
