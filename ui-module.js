@@ -28,33 +28,14 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
         })(key);
     }
     appendLoadStyle();
-    function wapper(key, name, args){
-        var hasKey = 'has' + key.replace(/^[a-z]/, function(a){
-            return a.toUpperCase();
-        });
 
-        if(!cache[hasKey]){
-            cache[hasKey] = {};
-        }
-
-        if(!cache[hasKey][name]){
-            cache[hasKey][name] = true;
-            if(key === 'controller' || key === 'filter'){
-                return ngMap[key]['register'].apply(ngMap[key], args);
-            }
-
-            return ngMap[key][key].apply(ngMap[key], args);
-        }       
-
-
-    }
-
-    $compileProvider.directive('uiModule', ['$compile', '$parse', '$interpolate',
-        function($compile, $parse, $interpolate) {
+    $compileProvider.directive('uiModule', ['$injector',
+        function($injector) {
             return {
                 scope: false,
                 priority: 500,
                 link: function(scope, elem, attrs) {
+                    var $compile = $injector.get('$compile');
                     var moduleUrl = attrs.uiModule;
                     if('uiLoading' in attrs){
                         elem.html('<div class="module-spinner"> <div class="module-spinner-container module-container1"> <div class="circle1"></div> <div class="circle2"></div> <div class="circle3"></div> <div class="circle4"></div> </div> <div class="module-spinner-container module-container2"> <div class="circle1"></div> <div class="circle2"></div> <div class="circle3"></div> <div class="circle4"></div> </div> <div class="module-spinner-container module-container3"> <div class="circle1"></div> <div class="circle2"></div> <div class="circle3"></div> <div class="circle4"></div> </div> </div>');
@@ -76,153 +57,146 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                     function moduleExec(moduleFn){
                         var moduleName = '';
                         var ctrlScope = '';
+
                         if(!angular.isFunction(moduleFn)){
-                            console.error('约定组件返回地址应该函数--组件地址:' + moduleUrl);
+                            throw errorInfo('约定组件返回地址应该函数--组件地址:' + moduleUrl);
                         }
+
                         elem.html('');
                         moduleFn(app, elem, attrs, scope);
                         $compile(elem.contents())(scope);
                         ctrlScope = elem.find('[ng-controller]').scope();
 
+                        setModuleName(ctrlScope, moduleUrl);
+
                         if(ctrlScope.moduleScope){
-                            var LOCAL_REGEXP = /^\s*([@=&^])(\??)\s*(\w*)\s*$/;
-
-                            isolateScope = ctrlScope;
-
-                            (function(isolateScope, scope){
-                                angular.forEach(ctrlScope.moduleScope, function(definition, scopeName) {
-                                    var match = definition.match(LOCAL_REGEXP) || [],
-                                        attrName = match[3] || scopeName,
-                                        optional = (match[2] == '?'),
-                                        mode = match[1], // @, =, or &
-                                        lastValue,
-                                        parentGet, parentSet, compare;
-
-                                    isolateScope.$$isolateBindings[scopeName] = mode + attrName;
-
-                                    switch (mode) {
-
-                                        case '@':
-                                            attrs.$observe(attrName, function(value) {
-                                                isolateScope[scopeName] = value;
-                                            });
-                                            attrs.$$observers[attrName].$$scope = scope;
-                                            if (attrs[attrName]) {
-                                                // If the attribute has been provided then we trigger an interpolation to ensure
-                                                // the value is there for use in the link fn
-                                                isolateScope[scopeName] = $interpolate(attrs[attrName])(scope);
-                                            }
-                                            break;
-
-                                        case '=':
-                                            if (optional && !attrs[attrName]) {
-                                                return;
-                                            }
-                                            parentGet = $parse(attrs[attrName]);
-                                            if (parentGet.literal) {
-                                                compare = equals;
-                                            } else {
-                                                compare = function(a, b) {
-                                                    return a === b || (a !== a && b !== b);
-                                                };
-                                            }
-                                            parentSet = parentGet.assign || function() {
-                                                // reset the change, or we will throw this exception on every $digest
-                                                lastValue = isolateScope[scopeName] = parentGet(scope);
-                                                throw $compileMinErr('nonassign',
-                                                    "Expression '{0}' used with directive '{1}' is non-assignable!",
-                                                    attrs[attrName], ctrlScope.name);
-                                            };
-                                            lastValue = isolateScope[scopeName] = parentGet(scope);
-                                            isolateScope.$watch(function parentValueWatch() {
-                                                var parentValue = parentGet(scope);
-                                                if (!compare(parentValue, isolateScope[scopeName])) {
-                                                    // we are out of sync and need to copy
-                                                    if (!compare(parentValue, lastValue)) {
-                                                        // parent changed and it has precedence
-                                                        isolateScope[scopeName] = parentValue;
-                                                    } else {
-                                                        // if the parent can be assigned then do so
-                                                        parentSet(scope, parentValue = isolateScope[scopeName]);
-                                                    }
-                                                }
-                                                return lastValue = parentValue;
-                                            }, null, parentGet.literal);
-                                            break;
-
-                                        case '^':
-                                            if (optional && !attrs[attrName]) {
-                                                return;
-                                            }
-                                            parentGet = $parse(attrs[attrName]);
-                                            if (parentGet.literal) {
-                                                compare = equals;
-                                            } else {
-                                                compare = function(a, b) {
-                                                    return a === b || (a !== a && b !== b);
-                                                };
-                                            }
-                                            parentSet = parentGet.assign || function() {
-                                                // reset the change, or we will throw this exception on every $digest
-                                                lastValue = isolateScope[scopeName] = parentGet(scope);
-                                                throw $compileMinErr('nonassign',
-                                                    "Expression '{0}' used with directive '{1}' is non-assignable!",
-                                                    attrs[attrName], ctrlScope.name);
-                                            };
-                                            
-                                            isolateScope.$watch(scopeName, function(val){
-                                                parentSet(scope, val);
-                                            });
-
-                                            break;
-
-                                        case '&':
-                                            parentGet = $parse(attrs[attrName]);
-                                            isolateScope[scopeName] = function(locals) {
-                                                return parentGet(scope, locals);
-                                            };
-                                            break;
-
-                                        default:
-                                            $compileMinErr('iscp',
-                                                "Invalid isolate scope definition for directive '{0}'." +
-                                                " Definition: {... {1}: '{2}' ...}",
-                                                ctrlScope.name, scopeName, definition);
-                                    }
-                                });
-                            })(isolateScope, scope);
-
-                            function $compileMinErr(){
-                                console.error('ui-module独立scope定义有问题：', arguments)
-                            }
+                            dataBind(ctrlScope, scope, attrs, $injector);
                         }
 
                         if(!scope.$$phase) {
                           scope.$apply();
-                        }
-                        try{
-                            var moduleName = getModuleName(moduleUrl);
-                            _G = window._G = window._G || {};
-                            _G.myScope = _G.myScope || {};
-                            _G.myScope[moduleName] = ctrlScope;
-                            ctrlScope.$moduleName = moduleName;
-                      
-                        }catch(e){
-                            console.log('设置_G.myScope.moduleName错误')
-                        }
-                        
+                        }                        
                     }
 
-                    function getModuleName(moduleUrl){
-                        var last = moduleUrl.lastIndexOf('/');
-                        var moduleName = moduleUrl.substr(last + 1);
-                        return moduleName;
-                    }
                 },
 
             };
         }
     ]);
+
+    function dataBind(isolateScope, scope, attrs, $injector){
+        var LOCAL_REGEXP = /^\s*([@=&><])(\??)\s*(\w*)\s*$/;
+        var $parse = $injector.get('$parse');
+        var $interpolate = $injector.get('$interpolate');
+
+        angular.forEach(isolateScope.moduleScope, function(definition, scopeName) {
+            var match = definition.match(LOCAL_REGEXP) || [],
+                attrName = match[3] || scopeName,
+                optional = (match[2] == '?'),
+                mode = match[1], // @, =, &, <, >
+                lastValue,
+                parentGet, parentSet, compare;
+
+            isolateScope.$$isolateBindings[scopeName] = mode + attrName;
+
+            switch (mode) {
+
+                case '@':
+                    attrs.$observe(attrName, function(value) {
+                        isolateScope[scopeName] = value;
+                    });
+                    attrs.$$observers[attrName].$$scope = scope;
+                    if (attrs[attrName]) {
+                        isolateScope[scopeName] = $interpolate(attrs[attrName])(scope);
+                    }
+                    break;
+
+                case '=':
+                    if (optional && !attrs[attrName]) {
+                        return;
+                    }
+                    parentGet = $parse(attrs[attrName]);
+                    if (parentGet.literal) {
+                        compare = equals;
+                    } else {
+                        compare = function(a, b) {
+                            return a === b || (a !== a && b !== b);
+                        };
+                    }
+                    parentSet = parentGet.assign || function() {
+                        lastValue = isolateScope[scopeName] = parentGet(scope);
+                        throw errorInfo('nonassign',
+                            "Expression '{0}' used with directive '{1}' is non-assignable!",
+                            attrs[attrName], ctrlScope.name);
+                    };
+                    lastValue = isolateScope[scopeName] = parentGet(scope);
+                    isolateScope.$watch(function parentValueWatch() {
+                        var parentValue = parentGet(scope);
+                        if (!compare(parentValue, isolateScope[scopeName])) {
+                            if (!compare(parentValue, lastValue)) {
+                                isolateScope[scopeName] = parentValue;
+                            } else {
+                                parentSet(scope, parentValue = isolateScope[scopeName]);
+                            }
+                        }
+                        return lastValue = parentValue;
+                    }, null, parentGet.literal);
+                    break;
+
+                case '>':
+                    
+                    scope.$watchCollection(attrs[attrName], function(val){
+                        var key = '___key___';
+                        var locals = {};
+                        locals[key] = angular.copy(val);
+                        isolateScope.$eval(scopeName + '=' + key, locals);
+                    });                                    
+                    break;
+
+                case '<':
+                    
+                    isolateScope.$eval(scopeName + '=""'); //使其不能访问父级属性
+
+                    isolateScope.$watchCollection(scopeName, function(val){
+                        var key = '___key___';
+                        var locals = {};
+                        locals[key] = angular.copy(val);                                  
+                        scope.$eval(attrs[attrName] + '=' + key, locals);
+                    }); 
+                    break;
+
+                case '&':
+                    parentGet = $parse(attrs[attrName]);
+                    isolateScope[scopeName] = function(locals) {
+                        return parentGet(scope, locals);
+                    };
+                    break;
+
+                default:
+                    throw errorInfo('define error', '必须定义通信标记，@=&<>');
+            }
+        });
+    
+    }
+
+    function wapper(key, name, args){
+        var hasKey = 'has' + key.replace(/^[a-z]/, function(a){
+            return a.toUpperCase();
+        });
+
+        if(!cache[hasKey]){
+            cache[hasKey] = {};
+        }
+
+        if(!cache[hasKey][name]){
+            cache[hasKey][name] = true;
+            if(key === 'controller' || key === 'filter'){
+                return ngMap[key]['register'].apply(ngMap[key], args);
+            }
+
+            return ngMap[key][key].apply(ngMap[key], args);
+        }       
+    }
 
     function appendLoadStyle(){
 
@@ -239,4 +213,29 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
 
         head.appendChild(style);
     }
+
+    function setModuleName(ctrlScope, moduleUrl){
+        try{
+            var moduleName = getModuleName(moduleUrl);
+            _G = window._G = window._G || {};
+            _G.myScope = _G.myScope || {};
+            _G.myScope[moduleName] = ctrlScope;
+            ctrlScope.$moduleName = moduleName;
+      
+        }catch(e){
+            console.log('设置_G.myScope.moduleName错误')
+        }
+    }
+
+    function getModuleName(moduleUrl){
+        var last = moduleUrl.lastIndexOf('/');
+        var moduleName = moduleUrl.substr(last + 1);
+        return moduleName;
+    }
+
+    function errorInfo(){
+        console.error('ui-module独立scope定义有问题：', arguments)
+    }
+
+
 }]);

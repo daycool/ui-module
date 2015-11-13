@@ -13,13 +13,15 @@
 </head>
 <body class="container">
 	<div ng-controller="Test">
-		用户名：{{data.userName}} <input ng-model="data.userName" type="text">@测试<br>
-		密码：{{data.userPass}} <input ng-model="data.userPass" type="text">=测试<br>
-		年龄：{{data.userAge}} <input ng-model="data.userAge" type="text">^测试<br>
-		地址：{{data.userAddr}} <input ng-model="data.userAddr" type="text" placeholder="显示用户地址">&测试<br>
+		用户名：{{data.userName}} <input ng-model="data.userName" type="text">@<span class="text-danger">(同定义angular指令中的scope相同)</span><br>
+		密码：{{data.userPass}} <input ng-model="data.userPass" type="text">=<span class="text-danger">(同定义angular指令中的scope相同)</span><br>
+		地址：{{data.userAddr}} <input ng-model="data.userAddr" type="text" placeholder="显示用户地址">&<span class="text-danger">(同定义angular指令中的scope相同)</span><br>
+		年龄：{{data.userAge}} <input ng-model="data.userAge" type="text">><span class="text-danger">(扩展单向传输数据---向<strong>"子"</strong>级传输)</span><br>
+		user.name：{{user.name}} <input ng-model="user.name" type="text">><span class="text-danger">(扩展单向传输数据---向<strong>"子"</strong>级传输)</span><br>
+		friend.name：{{friend.name}} <input ng-model="friend.name" type="text"><<span class="text-danger">(扩展单向传输数据---向<strong>"父"</strong>级传输)</span><br>
 		<h1 class="text-center">测试  ui-module</h1>
 		<h2>登录组件</h2>
-		<div ui-module="user/Login" user-name="{{data.userName}}" user-pass="data.userPass" user-age="data.userAge" show-addr="showAddr(userAddr)" class="well"></div>
+		<div ui-module="user/Login" user-name="{{data.userName}}" user-pass="data.userPass" user-age="data.userAge" show-addr="showAddr(userAddr)" user="user" friend="friend" class="well"></div>
 		<h2>用户列表组件</h2>
 		<div ui-module="user/UserList" ui-loading class="well"></div>
 	</div>
@@ -38,7 +40,15 @@
 			userPass: '123456',
 			userAge: '25',
 			userAddr: '',
-		}
+		};
+
+		$scope.user = {
+			name: 'qian'
+		};
+		$scope.friend = {
+			name: 'day'
+		};
+
 
 		$scope.showAddr = function(userAddr){
 			$scope.data.userAddr = userAddr;

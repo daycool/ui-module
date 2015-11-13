@@ -5,7 +5,9 @@ define('user/LoginCtrl', [], function() {
                 'userName': '@userName',
                 'userPass': '=userPass',
                 'showAddr': '&showAddr',
-                'userAge': '^userAge',
+                'userAge': '>userAge',
+                'user': '>user',
+                'friend': '<friend',
             };
 
             var data = $scope.data = {
