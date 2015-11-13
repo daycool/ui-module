@@ -52,7 +52,8 @@ ui-loading		显示loading动画(模块加载完成前)
 			'userName': '@userName',
             'userPass': '=userPass',
             'showAddr': '&showAddr',
-            'userAge': '^userAge',		//^扩展(和@相反)，即父变子不变，子变父变
+            'userAge': '>userAge',	//>扩展单向传输数据---向"子"级传输
+            'userAge': '<userAge',	//<扩展单向传输数据---向"父"级传输
 		}
 ```
 
