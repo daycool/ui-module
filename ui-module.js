@@ -127,7 +127,7 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                         lastValue = isolateScope[scopeName] = parentGet(scope);
                         throw errorInfo('nonassign',
                             "Expression '{0}' used with directive '{1}' is non-assignable!",
-                            attrs[attrName], ctrlScope.name);
+                            attrs[attrName], isolateScope.name);
                     };
                     lastValue = isolateScope[scopeName] = parentGet(scope);
                     isolateScope.$watch(function parentValueWatch() {
@@ -143,14 +143,53 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                     }, null, parentGet.literal);
                     break;
 
+                case '&':
+                    parentGet = $parse(attrs[attrName]);
+                    isolateScope[scopeName] = function(locals) {
+                        return parentGet(scope, locals);
+                    };
+                    break;
+
+
                 case '>':
-                    
-                    scope.$watchCollection(attrs[attrName], function(val){
+                    if (optional && !attrs[attrName]) {
+                        return;
+                    }
+                    parentGet = $parse(attrs[attrName]);
+                    if (parentGet.literal) {
+                        compare = equals;
+                    } else {
+                        compare = function(a, b) {
+                            return a === b || (a !== a && b !== b);
+                        };
+                    }
+                    // parentSet = parentGet.assign || function() {
+                    //     lastValue = isolateScope[scopeName] = parentGet(scope);
+                    //     throw errorInfo('nonassign',
+                    //         "Expression '{0}' used with directive '{1}' is non-assignable!",
+                    //         attrs[attrName], isolateScope.name);
+                    // };
+                    lastValue = isolateScope[scopeName] = angular.copy(parentGet(scope));
+                    isolateScope.$watch(function parentValueWatch() {
+                        var parentValue = parentGet(scope);
                         var key = '___key___';
                         var locals = {};
-                        locals[key] = angular.copy(val);
+                        locals[key] = angular.copy(parentValue);
+                        if(lastValue === parentValue){
+                            //lastValue parentValue 相等
+                        }
                         isolateScope.$eval(scopeName + '=' + key, locals);
-                    });                                    
+                        return lastValue = parentValue;
+                    }, function(val){
+                        console.log(val)
+                    }, parentGet.literal);
+                    
+                    // scope.$watchCollection(attrs[attrName], function(val){
+                    //     var key = '___key___';
+                    //     var locals = {};
+                    //     locals[key] = angular.copy(val);
+                    //     isolateScope.$eval(scopeName + '=' + key, locals);
+                    // });                                    
                     break;
 
                 case '<':
@@ -165,13 +204,7 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                     }); 
                     break;
 
-                case '&':
-                    parentGet = $parse(attrs[attrName]);
-                    isolateScope[scopeName] = function(locals) {
-                        return parentGet(scope, locals);
-                    };
-                    break;
-
+                
                 default:
                     throw errorInfo('define error', '必须定义通信标记，@=&<>');
             }
