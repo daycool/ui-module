@@ -73,9 +73,11 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                             dataBind(ctrlScope, scope, attrs, $injector);
                         }
 
-                        if(!scope.$root.$$phase) {
-                          scope.$apply();
-                        }                        
+                        if(!(scope.$root && scope.$root.$$phase)) {
+                            scope.$apply();
+                        }else if((!scope.$root) && (!scope.$$phase)){
+                            scope.$apply();
+                        }                            
                     }
 
                 },
