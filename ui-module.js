@@ -40,19 +40,10 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                     if('uiLoading' in attrs){
                         elem.html('<div class="module-spinner"> <div class="module-spinner-container module-container1"> <div class="circle1"></div> <div class="circle2"></div> <div class="circle3"></div> <div class="circle4"></div> </div> <div class="module-spinner-container module-container2"> <div class="circle1"></div> <div class="circle2"></div> <div class="circle3"></div> <div class="circle4"></div> </div> <div class="module-spinner-container module-container3"> <div class="circle1"></div> <div class="circle2"></div> <div class="circle3"></div> <div class="circle4"></div> </div> </div>');
                     }
-                    
-                    try {
-                        var moduleFn = require(moduleUrl);
-                        if(moduleFn){
-                            moduleExec(moduleFn);                 
-                        }else{
-                            console.error('组件返回为空--组件地址:' + moduleUrl);
-                        }
-                    } catch (e) {
-                        require([moduleUrl], function(moduleFn) {
-                            moduleExec(moduleFn);
-                        });
-                    }
+
+                    require([moduleUrl], function(moduleFn){
+                        moduleExec(moduleFn);
+                    });
 
                     function moduleExec(moduleFn){
                         var moduleName = '';
