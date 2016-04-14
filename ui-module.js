@@ -38,13 +38,16 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                     var $compile = $injector.get('$compile');
                     var moduleUrl = attrs.uiModule;
                     var isNowExec = attrs.isNowExec;
+                    
                     if('uiLoading' in attrs){
                         elem.html('<div class="module-spinner"> <div class="module-spinner-container module-container1"> <div class="circle1"></div> <div class="circle2"></div> <div class="circle3"></div> <div class="circle4"></div> </div> <div class="module-spinner-container module-container2"> <div class="circle1"></div> <div class="circle2"></div> <div class="circle3"></div> <div class="circle4"></div> </div> <div class="module-spinner-container module-container3"> <div class="circle1"></div> <div class="circle2"></div> <div class="circle3"></div> <div class="circle4"></div> </div> </div>');
                     }
 
                     if(isNowExec){
+                        var isLoad = false;
                         attrs.$observe('isNowExec', function(value) {
-                            if(value === "true"){
+                            if(value === "true" && isLoad === false){
+                                isLoad = true;
                                 require([moduleUrl], function(moduleFn){
                                     moduleExec(moduleFn);
                                 });
