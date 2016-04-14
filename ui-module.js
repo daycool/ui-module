@@ -37,13 +37,24 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                 link: function(scope, elem, attrs) {
                     var $compile = $injector.get('$compile');
                     var moduleUrl = attrs.uiModule;
+                    var isNowExec = attrs.isNowExec;
                     if('uiLoading' in attrs){
                         elem.html('<div class="module-spinner"> <div class="module-spinner-container module-container1"> <div class="circle1"></div> <div class="circle2"></div> <div class="circle3"></div> <div class="circle4"></div> </div> <div class="module-spinner-container module-container2"> <div class="circle1"></div> <div class="circle2"></div> <div class="circle3"></div> <div class="circle4"></div> </div> <div class="module-spinner-container module-container3"> <div class="circle1"></div> <div class="circle2"></div> <div class="circle3"></div> <div class="circle4"></div> </div> </div>');
                     }
 
-                    require([moduleUrl], function(moduleFn){
-                        moduleExec(moduleFn);
-                    });
+                    if(isNowExec){
+                        attrs.$observe('isNowExec', function(value) {
+                            if(value === "true"){
+                                require([moduleUrl], function(moduleFn){
+                                    moduleExec(moduleFn);
+                                });
+                            }
+                        });
+                    }else{
+                        require([moduleUrl], function(moduleFn){
+                            moduleExec(moduleFn);
+                        });
+                    }
 
                     function moduleExec(moduleFn){
                         var moduleName = '';
@@ -90,7 +101,7 @@ angular.module('ui-module', []).config(['$compileProvider', '$controllerProvider
                 lastValue,
                 parentGet, parentSet, compare;
 
-            isolateScope.$$isolateBindings[scopeName] = mode + attrName;
+            // isolateScope.$$isolateBindings[scopeName] = mode + attrName;
 
             switch (mode) {
 
